@@ -24,16 +24,10 @@ function App() {
     return unsubscribe
   }, [])
 
-  // Load player data when user is authenticated
-  useEffect(() => {
-    if (user) {
-      loadPlayerData()
-    }
-  }, [user, loadPlayerData])
-
   const loadPlayerData = useCallback(async () => {
     if (!user) return
     try {
+      // Try to load from database, but handle errors gracefully
       const players = await blink.db.players.list({
         where: { userId: user.id },
         limit: 1
@@ -44,8 +38,16 @@ function App() {
       }
     } catch (error) {
       console.error('Failed to load player data:', error)
+      // Continue without database - use local state only
     }
   }, [user])
+
+  // Load player data when user is authenticated
+  useEffect(() => {
+    if (user) {
+      loadPlayerData()
+    }
+  }, [user, loadPlayerData])
 
   const handleNavigate = (scene: string) => {
     setGameState(prev => ({ ...prev, currentScene: scene }))
@@ -53,16 +55,25 @@ function App() {
 
   const handleSaveCharacter = async (characterData: any) => {
     try {
+      let savedPlayer = null
+      
       if (gameState.player) {
         // Update existing character
-        await blink.db.players.update(gameState.player.id, {
-          name: characterData.name,
-          avatar: characterData.avatar,
-          updatedAt: new Date().toISOString()
-        })
+        try {
+          await blink.db.players.update(gameState.player.id, {
+            name: characterData.name,
+            avatar: characterData.avatar,
+            updatedAt: new Date().toISOString()
+          })
+          savedPlayer = { ...gameState.player, name: characterData.name, avatar: characterData.avatar }
+        } catch (dbError) {
+          console.error('Database update failed, using local state:', dbError)
+          savedPlayer = { ...gameState.player, name: characterData.name, avatar: characterData.avatar }
+        }
       } else {
         // Create new character
-        const newPlayer = await blink.db.players.create({
+        const newPlayerData = {
+          id: `player_${Date.now()}`, // Generate local ID
           userId: user.id,
           name: characterData.name,
           level: 1,
@@ -77,18 +88,40 @@ function App() {
           },
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        })
-        setGameState(prev => ({ ...prev, player: newPlayer }))
+        }
+        
+        try {
+          const dbPlayer = await blink.db.players.create(newPlayerData)
+          savedPlayer = dbPlayer
+        } catch (dbError) {
+          console.error('Database create failed, using local state:', dbError)
+          savedPlayer = newPlayerData
+        }
       }
       
-      // Reload player data to get updated info
-      await loadPlayerData()
+      // Update local state with the saved player
+      setGameState(prev => ({ ...prev, player: savedPlayer }))
       
       // Navigate back to menu
       handleNavigate('menu')
     } catch (error) {
       console.error('Failed to save character:', error)
-      alert('Failed to save character. Please try again.')
+      // Create a basic local player as fallback
+      const fallbackPlayer = {
+        id: `player_${Date.now()}`,
+        userId: user.id,
+        name: characterData.name,
+        level: 1,
+        experience: 0,
+        money: 1000,
+        careerPath: 'none',
+        avatar: characterData.avatar,
+        stats: { trickLevel: 1, popularity: 0, shopExperience: 0 },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+      setGameState(prev => ({ ...prev, player: fallbackPlayer }))
+      handleNavigate('menu')
     }
   }
 

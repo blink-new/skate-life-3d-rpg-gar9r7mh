@@ -6,32 +6,32 @@
 
 @layer base {
   :root {
-    --background: 26 26 26; /* #1A1A1A */
-    --foreground: 255 255 255;
-    --card: 31 31 31;
-    --card-foreground: 255 255 255;
-    --popover: 31 31 31;
-    --popover-foreground: 255 255 255;
-    --primary: 14 107 53; /* #FF6B35 converted to HSL */
-    --primary-foreground: 255 255 255;
-    --secondary: 78 196 196; /* #4ECDC4 converted to HSL */
-    --secondary-foreground: 26 26 26;
-    --muted: 38 38 38;
-    --muted-foreground: 163 163 163;
-    --accent: 78 196 196; /* #4ECDC4 */
-    --accent-foreground: 26 26 26;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 255 255 255;
-    --border: 64 64 64;
-    --input: 64 64 64;
-    --ring: 14 107 53;
+    --background: 0 0% 10%; /* #1A1A1A */
+    --foreground: 0 0% 100%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 14 82% 59%; /* #FF6B35 - Orange */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 180 78% 60%; /* #4ECDC4 - Teal */
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 64%;
+    --accent: 180 78% 60%; /* #4ECDC4 - Teal */
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 14 82% 59%;
     --radius: 0.75rem;
     
     /* Game specific colors */
-    --game-primary: 14 107 53; /* #FF6B35 - Orange */
+    --game-primary: 14 82% 59%; /* #FF6B35 - Orange */
     --game-secondary: 180 78% 60%; /* #4ECDC4 - Teal */
-    --game-dark: 15 15 15; /* #0F0F0F */
-    --game-bg: 26 26 26; /* #1A1A1A */
+    --game-dark: 0 0% 6%; /* #0F0F0F */
+    --game-bg: 0 0% 10%; /* #1A1A1A */
   }
 }
 

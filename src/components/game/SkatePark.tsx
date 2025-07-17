@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useMemo, useCallback } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Text, Box, Plane } from '@react-three/drei'
 import { motion } from 'framer-motion'
@@ -122,27 +122,15 @@ export function SkatePark({ onNavigate, player }: SkateParKProps) {
   const [energy, setEnergy] = useState(100)
   const [isPerformingTrick, setIsPerformingTrick] = useState(false)
 
-  const tricks = [
+  const tricks = useMemo(() => [
     { key: 'Q', name: 'Ollie', difficulty: 1, points: 100 },
     { key: 'W', name: 'Kickflip', difficulty: 2, points: 250 },
     { key: 'E', name: '360 Flip', difficulty: 3, points: 500 },
     { key: 'R', name: 'Heelflip', difficulty: 2, points: 300 },
     { key: 'T', name: 'Varial', difficulty: 3, points: 400 }
-  ]
+  ], [])
 
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      const trick = tricks.find(t => t.key.toLowerCase() === event.key.toLowerCase())
-      if (trick && energy >= trick.difficulty * 10) {
-        performTrick(trick)
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyPress)
-    return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [energy, isPerformingTrick, trickCombo]) // Include relevant state dependencies
-
-  const performTrick = (trick: any) => {
+  const performTrick = useCallback((trick: any) => {
     if (isPerformingTrick) return
 
     setIsPerformingTrick(true)
@@ -161,7 +149,19 @@ export function SkatePark({ onNavigate, player }: SkateParKProps) {
     setTimeout(() => {
       setIsPerformingTrick(false)
     }, 1000)
-  }
+  }, [isPerformingTrick, trickCombo])
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      const trick = tricks.find(t => t.key.toLowerCase() === event.key.toLowerCase())
+      if (trick && energy >= trick.difficulty * 10) {
+        performTrick(trick)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [energy, tricks, performTrick])
 
   // Energy regeneration
   useEffect(() => {
